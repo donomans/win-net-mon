@@ -1,0 +1,5 @@
+Network device monitor for Windows environments written in C# and .Net 2.0.
+
+Monitoring server runs as a service on a windows machine (XP, 2000, 2003, 2008, 7). Configuration is done with a configuration client that can run on any machine with access to the Server (uses TCP).
+
+Can monitor Ping, Http/s, Ftp, available .Net Performance Counters, Event logs, System Services, Wmi.
