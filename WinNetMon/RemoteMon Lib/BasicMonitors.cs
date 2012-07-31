@@ -34,6 +34,12 @@ namespace RemoteMon_Lib
             _basic.Add(basic.Hash, basic);
         }
 
+        public Boolean Contains(String hash)
+        {
+            return _basic.ContainsKey(hash);
+        }
+
+
         [XmlIgnore]
         public Int32 Count { get { return _basic.Count; } }
 

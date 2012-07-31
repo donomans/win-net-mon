@@ -21,6 +21,8 @@ namespace RemoteMon_Lib
         private EventMonitors _eventMonitors = new EventMonitors();
         private WmiMonitors _wmiMonitors = new WmiMonitors();
 
+        private Dictionary<FullMonitorType, IMonitors<IMonitor>> _monitors = new Dictionary<FullMonitorType, IMonitors<IMonitor>>();
+
         [XmlElement("TimeStamp")]
         public DateTime TimeStamp
         {
@@ -35,6 +37,11 @@ namespace RemoteMon_Lib
             set { _verboseLogging = value; }
         }
 
+        [XmlIgnore]
+        public IEnumerable<IMonitor> AllMonitors
+        {
+            get { return _monitors.ToSomething<KeyValuePair<FullMonitorType, IMonitors<IMonitor>>, IMonitor>(a => a.Value); }
+        }
 
         [XmlElement("Settings")]
         public MonitorSettings Settings
@@ -46,8 +53,8 @@ namespace RemoteMon_Lib
         [XmlElement("Basic")]
         public BasicMonitors BasicMonitors
         {
-            get { return _basicMonitors; }
-            set { _basicMonitors = value; }
+            get { return (BasicMonitors)_monitors[FullMonitorType.Basic]; }//_basicMonitors; }
+            set { _monitors[FullMonitorType.Basic] = (IMonitors<IMonitor>)value; }
         }
         [XmlElement("PerformanceCounters")]
         public PfcMonitors PfcMonitors
@@ -77,26 +84,37 @@ namespace RemoteMon_Lib
         [XmlIgnore]
         public Int32 Count 
         {
-            get { return _basicMonitors.Count + _eventMonitors.Count + _pfcMonitors.Count + _serviceMonitors.Count + _wmiMonitors.Count; }
+            get { return _monitors.Sum(a => a.Value.Count);}// _basicMonitors.Count + _eventMonitors.Count + _pfcMonitors.Count + _serviceMonitors.Count + _wmiMonitors.Count; }
         }
 
         public IMonitor this[String hash]
         {
             get
-            {
-                IMonitor monitor = _pfcMonitors[hash];
-                if (monitor != null)
-                    return monitor;
-                monitor = _serviceMonitors[hash];
-                if (monitor != null)
-                    return monitor;
-                monitor = _eventMonitors[hash];
-                if (monitor != null)
-                    return monitor;
-                monitor = _basicMonitors[hash];
-                if (monitor != null)
-                    return monitor;
-                monitor = _wmiMonitors[hash];
+            {                
+                //IMonitor monitor = _pfcMonitors[hash];
+                //if (monitor != null)
+                //    return monitor;
+                //monitor = _serviceMonitors[hash];
+                //if (monitor != null)
+                //    return monitor;
+                //monitor = _eventMonitors[hash];
+                //if (monitor != null)
+                //    return monitor;
+                //monitor = _basicMonitors[hash];
+                //if (monitor != null)
+                //    return monitor;
+                //monitor = _wmiMonitors[hash];
+                //return monitor;
+
+                IMonitor monitor = null;
+                _monitors.Map(a =>
+                {
+                    if (a.Value.Contains(hash))
+                    {
+                        monitor = a.Value[hash];
+                        return;
+                    }
+                });
                 return monitor;
             }
         }
@@ -104,34 +122,40 @@ namespace RemoteMon_Lib
         {
             get
             {
-                switch(type)
-                {
-                    case FullMonitorType.Basic:
-                        return _basicMonitors[hash];
-                    case FullMonitorType.EventLog:
-                        return _eventMonitors[hash];
-                    case FullMonitorType.PerformanceCounter:
-                        return _pfcMonitors[hash];
-                    case FullMonitorType.Service:
-                        return _serviceMonitors[hash];
-                    case FullMonitorType.Wmi:
-                        return _wmiMonitors[hash];
-                }
-                return null;
+                return _monitors[type][hash];
+                //switch(type)
+                //{
+                //    case FullMonitorType.Basic:
+                //        return _basicMonitors[hash];
+                //    case FullMonitorType.EventLog:
+                //        return _eventMonitors[hash];
+                //    case FullMonitorType.PerformanceCounter:
+                //        return _pfcMonitors[hash];
+                //    case FullMonitorType.Service:
+                //        return _serviceMonitors[hash];
+                //    case FullMonitorType.Wmi:
+                //        return _wmiMonitors[hash];
+                //}
+                //return null;
             }
         }
         public void RemoveMonitor(String hash)
         {
-            if (_pfcMonitors.Remove(hash))
-                return;
-            else if (_serviceMonitors.Remove(hash))
-                return;
-            else if (_eventMonitors.Remove(hash))
-                return;
-            else if (_basicMonitors.Remove(hash))
-                return;
-            else if (_wmiMonitors.Remove(hash))
-                return;
+            _monitors.Map(a =>
+            {
+                if (a.Value.Remove(hash))
+                    return;
+            });
+            //if (_pfcMonitors.Remove(hash))
+            //    return;
+            //else if (_serviceMonitors.Remove(hash))
+            //    return;
+            //else if (_eventMonitors.Remove(hash))
+            //    return;
+            //else if (_basicMonitors.Remove(hash))
+            //    return;
+            //else if (_wmiMonitors.Remove(hash))
+            //    return;
         }
 
         public Boolean ExportToXml(String fileName)
@@ -149,40 +173,50 @@ namespace RemoteMon_Lib
 
         public void Add(Object monitor)
         {
-            switch (((IMonitor)monitor).Type)
-            {
-                case FullMonitorType.Basic:
-                    _basicMonitors.Add(monitor);
-                    break;
-                case FullMonitorType.EventLog:
-                    _eventMonitors.Add(monitor);
-                    break;
-                case FullMonitorType.PerformanceCounter:
-                    _pfcMonitors.Add(monitor);
-                    break;
-                case FullMonitorType.Service:
-                    _serviceMonitors.Add(monitor);
-                    break;
-                case FullMonitorType.Wmi:
-                    _wmiMonitors.Add(monitor);
-                    break;
-            }
+            _monitors[((IMonitor)monitor).Type].Add(monitor);
+            //switch (((IMonitor)monitor).Type)
+            //{
+            //    case FullMonitorType.Basic:
+            //        _basicMonitors.Add(monitor);
+            //        break;
+            //    case FullMonitorType.EventLog:
+            //        _eventMonitors.Add(monitor);
+            //        break;
+            //    case FullMonitorType.PerformanceCounter:
+            //        _pfcMonitors.Add(monitor);
+            //        break;
+            //    case FullMonitorType.Service:
+            //        _serviceMonitors.Add(monitor);
+            //        break;
+            //    case FullMonitorType.Wmi:
+            //        _wmiMonitors.Add(monitor);
+            //        break;
+            //}
         }
 
         public IEnumerable<IMonitor> ToEnumerable()
         {
             IMonitor[] monitors = new IMonitor[this.Count];
             Int32 count = 0;
-            foreach (BasicMonitor monitor in _basicMonitors)
-                monitors[count++] = monitor;
-            foreach (WmiMonitor monitor in _wmiMonitors)
-                monitors[count++] = monitor;
-            foreach (PfcMonitor monitor in _pfcMonitors)
-                monitors[count++] = monitor;
-            foreach (EventMonitor monitor in _eventMonitors)
-                monitors[count++] = monitor;
-            foreach (ServiceMonitor monitor in _serviceMonitors)
-                monitors[count++] = monitor;
+            _monitors.Map(a =>
+                {
+                    a.Value.Map(m =>
+                        {
+                            monitors[count++] = m;
+                        });
+                });
+            //IMonitor[] monitors = new IMonitor[this.Count];
+            //Int32 count = 0;
+            //foreach (BasicMonitor monitor in _basicMonitors)
+            //    monitors[count++] = monitor;
+            //foreach (WmiMonitor monitor in _wmiMonitors)
+            //    monitors[count++] = monitor;
+            //foreach (PfcMonitor monitor in _pfcMonitors)
+            //    monitors[count++] = monitor;
+            //foreach (EventMonitor monitor in _eventMonitors)
+            //    monitors[count++] = monitor;
+            //foreach (ServiceMonitor monitor in _serviceMonitors)
+            //    monitors[count++] = monitor;
 
             return monitors;
         }
@@ -225,6 +259,9 @@ namespace RemoteMon_Lib
         T this[String hash] { get; }
         Boolean Remove(String hash);
         Int32 Count { get; }
+
+        void Add(Object monitor);
+        Boolean Contains(String hash);
     }
 
     /// <summary>
