@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using System.Linq;
 
 namespace RemoteMon_Lib
 {
@@ -297,6 +298,8 @@ namespace RemoteMon_Lib
         private EventResults _eventResults = new EventResults();
         private PfcResults _pfcResults = new PfcResults();
         private BasicResults _basicResults = new BasicResults();
+
+        private Dictionary<FullMonitorType, IResults<IResult>> _results = new Dictionary<FullMonitorType, IResults<IResult>>();
 
         public Results() { }
 
