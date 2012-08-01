@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Management;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace RemoteMon_Lib
@@ -35,6 +36,11 @@ namespace RemoteMon_Lib
             WmiMonitor wmi = (WmiMonitor) pfcMonitor;
             _wmiTypes.Add(wmi.Hash, wmi);
         }
+        public Boolean Contains(String hash)
+        {
+            return _wmiTypes.ContainsKey(hash);
+        }
+
 
         [XmlIgnore]
         public Int32 Count { get { return _wmiTypes.Count; } }

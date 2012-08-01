@@ -11,7 +11,8 @@ using System.Xml;
 using RemoteMon_Lib;
 using ThreadState = System.Threading.ThreadState;
 
-//ಠ_ಠ
+//ಠ_ಠ 
+///THIS NEEDS TO BE REDONE WITH ASYNC 
 
 namespace RemoteMon
 {

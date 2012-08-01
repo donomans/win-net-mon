@@ -3,23 +3,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace RemoteMon_Lib
 {
     [SerializableAttribute]
     [XmlRootAttribute(ElementName = "Configuration", IsNullable = false)]
-    public class ConfigurationData// : IExportable<ConfigurationData>//: IEnumerable<CMonitor>
+    public class ConfigurationData
     {
         public ConfigurationData() { }
 
         private DateTime _timeStamp = new DateTime();
         private Boolean _verboseLogging = true;
         private MonitorSettings _settings = new MonitorSettings();
-        private BasicMonitors _basicMonitors = new BasicMonitors();
-        private PfcMonitors _pfcMonitors = new PfcMonitors();
-        private ServiceMonitors _serviceMonitors = new ServiceMonitors();
-        private EventMonitors _eventMonitors = new EventMonitors();
-        private WmiMonitors _wmiMonitors = new WmiMonitors();
 
         private Dictionary<FullMonitorType, IMonitors<IMonitor>> _monitors = new Dictionary<FullMonitorType, IMonitors<IMonitor>>();
 
@@ -40,7 +36,7 @@ namespace RemoteMon_Lib
         [XmlIgnore]
         public IEnumerable<IMonitor> AllMonitors
         {
-            get { return _monitors.ToSomething<KeyValuePair<FullMonitorType, IMonitors<IMonitor>>, IMonitor>(a => a.Value); }
+            get { return _monitors.Select<KeyValuePair<FullMonitorType, IMonitors<IMonitor>>, IMonitor>(a => a.Value); }
         }
 
         [XmlElement("Settings")]
@@ -53,59 +49,44 @@ namespace RemoteMon_Lib
         [XmlElement("Basic")]
         public BasicMonitors BasicMonitors
         {
-            get { return (BasicMonitors)_monitors[FullMonitorType.Basic]; }//_basicMonitors; }
+            get { return (BasicMonitors)_monitors[FullMonitorType.Basic]; }
             set { _monitors[FullMonitorType.Basic] = (IMonitors<IMonitor>)value; }
         }
         [XmlElement("PerformanceCounters")]
         public PfcMonitors PfcMonitors
         {
-            get { return _pfcMonitors; }
-            set { _pfcMonitors = value; }
+            get { return (PfcMonitors)_monitors[FullMonitorType.PerformanceCounter]; }
+            set { _monitors[FullMonitorType.PerformanceCounter] = (IMonitors<IMonitor>)value; }
         }
         [XmlElement("Services")]
         public ServiceMonitors ServiceMonitors
         {
-            get { return _serviceMonitors; }
-            set { _serviceMonitors = value; }
+            get { return (ServiceMonitors)_monitors[FullMonitorType.Service]; }
+            set { _monitors[FullMonitorType.Service] = (IMonitors<IMonitor>)value; }
         }
         [XmlElement("Events")]
         public EventMonitors EventMonitors
         {
-            get { return _eventMonitors; }
-            set { _eventMonitors = value; }
+            get { return (EventMonitors)_monitors[FullMonitorType.EventLog]; }
+            set { _monitors[FullMonitorType.EventLog] = (IMonitors<IMonitor>)value; }
         }
         [XmlElement("Wmi")]
         public WmiMonitors WmiMonitors
         {
-            get { return _wmiMonitors; }
-            set { _wmiMonitors = value; }
+            get { return (WmiMonitors)_monitors[FullMonitorType.Wmi]; }
+            set { _monitors[FullMonitorType.Wmi] = (IMonitors<IMonitor>)value; }
         }
 
         [XmlIgnore]
         public Int32 Count 
         {
-            get { return _monitors.Sum(a => a.Value.Count);}// _basicMonitors.Count + _eventMonitors.Count + _pfcMonitors.Count + _serviceMonitors.Count + _wmiMonitors.Count; }
+            get { return _monitors.Sum(a => a.Value.Count);}
         }
 
         public IMonitor this[String hash]
         {
             get
-            {                
-                //IMonitor monitor = _pfcMonitors[hash];
-                //if (monitor != null)
-                //    return monitor;
-                //monitor = _serviceMonitors[hash];
-                //if (monitor != null)
-                //    return monitor;
-                //monitor = _eventMonitors[hash];
-                //if (monitor != null)
-                //    return monitor;
-                //monitor = _basicMonitors[hash];
-                //if (monitor != null)
-                //    return monitor;
-                //monitor = _wmiMonitors[hash];
-                //return monitor;
-
+            {
                 IMonitor monitor = null;
                 _monitors.Map(a =>
                 {
@@ -120,24 +101,7 @@ namespace RemoteMon_Lib
         }
         public IMonitor this[FullMonitorType type, String hash]
         {
-            get
-            {
-                return _monitors[type][hash];
-                //switch(type)
-                //{
-                //    case FullMonitorType.Basic:
-                //        return _basicMonitors[hash];
-                //    case FullMonitorType.EventLog:
-                //        return _eventMonitors[hash];
-                //    case FullMonitorType.PerformanceCounter:
-                //        return _pfcMonitors[hash];
-                //    case FullMonitorType.Service:
-                //        return _serviceMonitors[hash];
-                //    case FullMonitorType.Wmi:
-                //        return _wmiMonitors[hash];
-                //}
-                //return null;
-            }
+            get { return _monitors[type][hash]; }
         }
         public void RemoveMonitor(String hash)
         {
@@ -146,22 +110,11 @@ namespace RemoteMon_Lib
                 if (a.Value.Remove(hash))
                     return;
             });
-            //if (_pfcMonitors.Remove(hash))
-            //    return;
-            //else if (_serviceMonitors.Remove(hash))
-            //    return;
-            //else if (_eventMonitors.Remove(hash))
-            //    return;
-            //else if (_basicMonitors.Remove(hash))
-            //    return;
-            //else if (_wmiMonitors.Remove(hash))
-            //    return;
         }
 
         public Boolean ExportToXml(String fileName)
-        {
-            XmlExport xml = new XmlExport(fileName, this);
-            return xml.ExportConfigurationData();
+        {            
+            return new XmlExport(fileName, this).ExportConfigurationData();
         }
 
         public static ConfigurationData LoadConfiguration(String fileName)
@@ -174,49 +127,19 @@ namespace RemoteMon_Lib
         public void Add(Object monitor)
         {
             _monitors[((IMonitor)monitor).Type].Add(monitor);
-            //switch (((IMonitor)monitor).Type)
-            //{
-            //    case FullMonitorType.Basic:
-            //        _basicMonitors.Add(monitor);
-            //        break;
-            //    case FullMonitorType.EventLog:
-            //        _eventMonitors.Add(monitor);
-            //        break;
-            //    case FullMonitorType.PerformanceCounter:
-            //        _pfcMonitors.Add(monitor);
-            //        break;
-            //    case FullMonitorType.Service:
-            //        _serviceMonitors.Add(monitor);
-            //        break;
-            //    case FullMonitorType.Wmi:
-            //        _wmiMonitors.Add(monitor);
-            //        break;
-            //}
         }
 
         public IEnumerable<IMonitor> ToEnumerable()
         {
             IMonitor[] monitors = new IMonitor[this.Count];
             Int32 count = 0;
-            _monitors.Map(a =>
+            _monitors.Map(t =>
                 {
-                    a.Value.Map(m =>
+                    t.Value.Map(m =>
                         {
                             monitors[count++] = m;
                         });
                 });
-            //IMonitor[] monitors = new IMonitor[this.Count];
-            //Int32 count = 0;
-            //foreach (BasicMonitor monitor in _basicMonitors)
-            //    monitors[count++] = monitor;
-            //foreach (WmiMonitor monitor in _wmiMonitors)
-            //    monitors[count++] = monitor;
-            //foreach (PfcMonitor monitor in _pfcMonitors)
-            //    monitors[count++] = monitor;
-            //foreach (EventMonitor monitor in _eventMonitors)
-            //    monitors[count++] = monitor;
-            //foreach (ServiceMonitor monitor in _serviceMonitors)
-            //    monitors[count++] = monitor;
 
             return monitors;
         }
@@ -247,12 +170,7 @@ namespace RemoteMon_Lib
         #endregion
     }
 
-    //public interface IExportable<out T>
-    //{
-    //    Boolean ExportToXml(String fileName);
-    //    T LoadConfiguration(String fileName);
-    //}
-
+    
     public interface IMonitors<T> : IEnumerable<T> where T : IMonitor
     {
         Dictionary<String, T> Monitor { get; set; }
@@ -267,12 +185,6 @@ namespace RemoteMon_Lib
     /// <summary>
     /// Base Monitor information
     /// </summary>  
-    //[XmlInclude(typeof(WmiMonitor))]
-    //[XmlInclude(typeof(BasicMonitor))]
-    //[XmlInclude(typeof(PfcMonitor))]
-    //[XmlInclude(typeof(ServiceMonitor))]
-    //[XmlInclude(typeof(EventMonitor))]
-    //[SerializableAttribute]
     public interface IMonitor
     {
         String Server { get; set; } //NOTE: store the ip/hostname or url
@@ -307,8 +219,7 @@ namespace RemoteMon_Lib
     [XmlInclude(typeof(PfcMonitor))]
     [XmlInclude(typeof(ServiceMonitor))]
     [XmlInclude(typeof(EventMonitor))]
-    //[SerializableAttribute]
-    public interface IResult//<T> where T : IMonitor
+    public interface IResult
     {
         Object Monitor { get; set; } //had to change to object - IMonitor won't serialize... this is so dumb.
         Boolean Ok { get; set; }
@@ -328,14 +239,8 @@ namespace RemoteMon_Lib
     [XmlInclude(typeof(ServiceResult))]
     [XmlInclude(typeof(EventResult))]
     [SerializableAttribute]
-    public class Results// : IEnumerable<CResult>
+    public class Results
     {
-        private ServiceResults _serviceResults = new ServiceResults();
-        private WmiResults _wmiResults = new WmiResults();
-        private EventResults _eventResults = new EventResults();
-        private PfcResults _pfcResults = new PfcResults();
-        private BasicResults _basicResults = new BasicResults();
-
         private Dictionary<FullMonitorType, IResults<IResult>> _results = new Dictionary<FullMonitorType, IResults<IResult>>();
 
         public Results() { }
@@ -347,137 +252,63 @@ namespace RemoteMon_Lib
 
         public Int32 Count
         {
-            get{ return _serviceResults.Count + _wmiResults.Count + _eventResults.Count + _pfcResults.Count + _basicResults.Count; }
+            get { return _results.Sum(a => a.Value.Count); }
         }
 
         public ServiceResults ServiceResults
         {
-            get { return _serviceResults; }
-            set { _serviceResults = value; }
+            get { return (ServiceResults)_results[FullMonitorType.Service]; }
+            set { _results[FullMonitorType.Service] = (IResults<IResult>)value; }            
         }
         public WmiResults WmiResults
         {
-            get { return _wmiResults; }
-            set { _wmiResults = value; }
+            get { return (WmiResults)_results[FullMonitorType.Wmi]; }
+            set { _results[FullMonitorType.Wmi] = (IResults<IResult>)value; }
         }
         public EventResults EventResults
         {
-            get { return _eventResults; }
-            set { _eventResults = value; }
+            get { return (EventResults)_results[FullMonitorType.EventLog]; }
+            set { _results[FullMonitorType.EventLog] = (IResults<IResult>)value; }
         }
         public PfcResults PfcResults
         {
-            get { return _pfcResults; }
-            set { _pfcResults = value; }
+            get { return (PfcResults)_results[FullMonitorType.PerformanceCounter]; }
+            set { _results[FullMonitorType.PerformanceCounter] = (IResults<IResult>)value; }
         }
         public BasicResults BasicResults
         {
-            get { return _basicResults; }
-            set { _basicResults = value; }
+            get { return (BasicResults)_results[FullMonitorType.Basic]; }
+            set { _results[FullMonitorType.Basic] = (IResults<IResult>)value; }
         }
 
         public void AddRange(IEnumerable<IResult> results)
         {
-            foreach(IResult ir in results)
-            {
-                switch(ir.Type)
-                {
-                    case FullMonitorType.Basic:
-                        _basicResults.Add(ir);
-                        break;
-                    case FullMonitorType.EventLog:
-                        _eventResults.Add(ir);
-                        break;
-                    case FullMonitorType.PerformanceCounter:
-                        _pfcResults.Add(ir);
-                        break;
-                    case FullMonitorType.Service:
-                        _serviceResults.Add(ir);
-                        break;
-                    case FullMonitorType.Wmi:
-                        _wmiResults.Add(ir);
-                        break;
-                }
-            }
+            results.Map(r => _results[r.Type].Add(r));            
         }
         public void Add(IResult result)
         {
-            switch (result.Type)
-            {
-                case FullMonitorType.Basic:
-                    _basicResults.Add(result);
-                    break;
-                case FullMonitorType.EventLog:
-                    _eventResults.Add(result);
-                    break;
-                case FullMonitorType.PerformanceCounter:
-                    _pfcResults.Add(result);
-                    break;
-                case FullMonitorType.Service:
-                    _serviceResults.Add(result);
-                    break;
-                case FullMonitorType.Wmi:
-                    _wmiResults.Add(result);
-                    break;
-            }
+            _results[result.Type].Add(result);           
         }
 
         public void Clear()
         {
-            _serviceResults.Clear();
-            _basicResults.Clear();
-            _eventResults.Clear();
-            _pfcResults.Clear();
-            _wmiResults.Clear();
+            _results.Clear();            
         }
 
         public IEnumerable<IResult> ToEnumerable()
         {
             IResult[] results = new IResult[this.Count];
             Int32 count = 0;
-            foreach (BasicResult result in _basicResults)
-                results[count++] = result;
-            foreach (EventResult result in _eventResults)
-                results[count++] = result;
-            foreach (PfcResult result in _pfcResults)
-                results[count++] = result;
-            foreach (ServiceResult result in _serviceResults)
-                results[count++] = result;
-            foreach (WmiResult result in _wmiResults)
-                results[count++] = result;
 
+            _results.Map(t =>
+                {
+                    t.Value.Map(r =>
+                        {
+                            results[count++] = r;
+                        });
+                });           
             return results;
-        }
-
-        #region Implementation of IEnumerable
-        //public IEnumerator<IResult> GetEnumerator()
-        //{
-        //    //IEnumerator<Dictionary<String,CResult>> ienumresults = _results.Values.GetEnumerator(); //.GetEnumerator();
-        //    List<IResult> results = new List<IResult>();//
-        //    foreach (IResult result in _basicResults)
-        //        results.Add(result);
-        //    foreach (IResult result in _eventResults)
-        //        results.Add(result);
-        //    foreach (IResult result in _pfcResults)
-        //        results.Add(result);
-        //    foreach (IResult result in _serviceResults)
-        //        results.Add(result);
-        //    foreach (IResult result in _wmiResults)
-        //        results.Add(result);
-        //    //while(ienumresults.MoveNext())
-        //    //{
-        //    //    if(ienumresults.Current != null)
-        //    //        results.AddRange(ienumresults.Current.Values);
-        //    //}
-        //    //ienumresults.Dispose();
-            
-        //    return results.GetEnumerator();
-        //}
-        //IEnumerator IEnumerable.GetEnumerator()
-        //{
-        //    return GetEnumerator();
-        //}
-        #endregion
+        } 
     }
 
 

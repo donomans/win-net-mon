@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.ServiceProcess;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace RemoteMon_Lib
@@ -31,6 +32,12 @@ namespace RemoteMon_Lib
             ServiceMonitor service = (ServiceMonitor) serviceMonitor;
             _services.Add(service.Hash, service);
         }
+        public Boolean Contains(String hash)
+        {
+            return _services.ContainsKey(hash);
+        }
+
+
 
         [XmlIgnore]
         public Int32 Count { get { return _services.Count; } }

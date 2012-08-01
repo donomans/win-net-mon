@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace RemoteMon_Lib
@@ -33,6 +34,12 @@ namespace RemoteMon_Lib
             PfcMonitor pfc = (PfcMonitor) pfcMonitor;
             _pfcTypes.Add(pfc.Hash, pfc);
         }
+        public Boolean Contains(String hash)
+        {
+            return _pfcTypes.ContainsKey(hash);
+        }
+
+
 
         [XmlIgnore]
         public Int32 Count { get { return _pfcTypes.Count; } }

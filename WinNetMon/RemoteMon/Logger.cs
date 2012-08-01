@@ -3,24 +3,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 
-namespace Nagios_RemoteMon
+namespace RemoteMon
 {
-    public sealed class Logger
+    public sealed class Logger_GARBAGE //why is this here?
     {
-        private static readonly Logger instance = new Logger();
+        private static readonly Logger_GARBAGE instance = new Logger_GARBAGE();
         private String _fileName = "";
         private Boolean _keepLogging = true;
         private readonly List<String> _toLog = new List<String>();//List<String> _toLog = new List<String>();
 
-        public static Logger Instance
+        public static Logger_GARBAGE Instance
         {
             get { return instance; }
         }
 
-        public void Log(LogType type, String text)
+        public void Log(LogType_GARBAGE type, String text)
         {
             String methodName = "";
-            if (type == LogType.Debug)
+            if (type == LogType_GARBAGE.Debug)
             {
                 try
                 {
@@ -47,16 +47,16 @@ namespace Nagios_RemoteMon
                 innerExceptions += " --> Inner exception: " + innerException.Message;
                 innerException = innerException.InnerException;
             }
-            _toLog.Add(DateTime.Now + "\t" + LogType.Exception + "\t" +
+            _toLog.Add(DateTime.Now + "\t" + LogType_GARBAGE.Exception + "\t" +
                        type.ToString() + " " + methodName +
                        " threw exception: " + exception.Message.Replace("\r\n", "") +
                        innerExceptions);
             PushLog();
         }
-        static Logger()
+        static Logger_GARBAGE()
         {
         }
-        private Logger()
+        private Logger_GARBAGE()
         {
             _keepLogging = true;
         }
@@ -101,7 +101,7 @@ namespace Nagios_RemoteMon
             _fileName = fileName;
         }
     }
-    public enum LogType
+    public enum LogType_GARBAGE
     {
         Info,
         Debug,

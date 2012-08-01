@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
+
+///THIS NEEDS TO BE REDONE WITH PARALLEL OR ASYNC
 
 namespace RemoteMon_Lib
 {
@@ -151,26 +154,8 @@ namespace RemoteMon_Lib
                     else
                         _allmonitors.Clear();
 
-                    foreach (PfcMonitor im in configurationData.PfcMonitors)
-                    {
-                        _allmonitors.Add(new MonitorInformation(im));
-                    }
-                    foreach (EventMonitor im in configurationData.EventMonitors)
-                    {
-                        _allmonitors.Add(new MonitorInformation(im));
-                    }
-                    foreach (BasicMonitor im in configurationData.BasicMonitors)
-                    {
-                        _allmonitors.Add(new MonitorInformation(im));
-                    }
-                    foreach (WmiMonitor im in configurationData.WmiMonitors)
-                    {
-                        _allmonitors.Add(new MonitorInformation(im));
-                    }
-                    foreach (ServiceMonitor im in configurationData.ServiceMonitors)
-                    {
-                        _allmonitors.Add(new MonitorInformation(im));
-                    }
+                    _allmonitors.AddRange(configurationData.AllMonitors.Select(m => new MonitorInformation(m)));
+
                 }
                 Logger.Instance.Log(this.GetType(), LogType.Info, "Scheduler configuration loaded.");
             }
@@ -194,13 +179,6 @@ namespace RemoteMon_Lib
                 lock (MonitorScheduler.Locks.ResultLocker)
                 {
                     _workingResults.AddRange(results);
-                    //foreach (CResult ir in results)
-                    //{
-                    //    if (_workingResults.ContainsKey(ir.MonitorHash))
-                    //        _workingResults[ir.MonitorHash] = ir;
-                    //    else
-                    //        _workingResults.Add(ir.MonitorHash, ir);
-                    //}
                 }
             }
 
@@ -209,10 +187,6 @@ namespace RemoteMon_Lib
                 lock (MonitorScheduler.Locks.ResultLocker)
                 {
                     _workingResults.Add(result);
-                    //if (_workingResults.ContainsKey(result.MonitorHash))
-                    //    _workingResults[result.MonitorHash] = result;
-                    //else
-                    //    _workingResults.Add(result.MonitorHash, result);
                 }
             }
         }
@@ -251,7 +225,7 @@ namespace RemoteMon_Lib
         private class MonitorInformation : IWorkUnit
         {
             private readonly IMonitor _monitor;
-            private DateTime _lastRunTime;// = DateTime.Now;
+            private DateTime _lastRunTime;
             private Int64 _lastRunLength = 0;
             private readonly Stopwatch _stopwatch = new Stopwatch();
             private volatile Boolean _isRunning = false;
@@ -272,34 +246,22 @@ namespace RemoteMon_Lib
 
             public IResult Check()
             {
-                //IsRunning = true;
-                //_stopwatch.Reset();
-                //_stopwatch.Start();
                 IResult ir = _monitor.Check();
-                //_stopwatch.Stop();
                 _lastRunLength = ir.RunLength;
                 _lastRunTime = ir.RunTime;
-                //IsScheduled = false;
-                //IsRunning = false;
                 return ir;
             }
 
             public override String ToString()
             {
-                return _monitor.FriendlyName;//.ToString();//maybe need to change this?
+                return _monitor.FriendlyName;
             }
-            //public void UpdateLastRun()
-            //{
-            //    _lastRunTime = DateTime.Now;
-            //}
         }
         private class ThreadScheduler
         {
             private Thread _worker;
             private NewThreads _threads;
 
-            //private readonly Priority _schedulePriority;
-            //private DateTime _lastRun = DateTime.Now;
 
             public ThreadScheduler(Int32 maxThreads)//, Priority schedulePriority)
             {

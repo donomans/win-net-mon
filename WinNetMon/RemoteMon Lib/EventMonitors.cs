@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace RemoteMon_Lib
@@ -33,6 +34,12 @@ namespace RemoteMon_Lib
             EventMonitor em = (EventMonitor) eventMonitor;
             _events.Add(em.Hash, em);
         }
+
+        public Boolean Contains(String hash)
+        {
+            return _events.ContainsKey(hash);
+        }
+
 
         [XmlIgnore]
         public Int32 Count { get { return _events.Count; } }
