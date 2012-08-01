@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 
-namespace Nagios_RemoteMon
+namespace RemoteMon
 {
     public sealed class Logger
     {
