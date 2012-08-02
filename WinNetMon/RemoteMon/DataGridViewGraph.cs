@@ -59,7 +59,7 @@ namespace RemoteMon
             get
             {
                 Single max = 0;
-                foreach (Single d in _values.Values)
+                foreach (Single d in _values)//.Values)
                 {
                     if (d > max)
                         max = d;
@@ -73,7 +73,7 @@ namespace RemoteMon
             get
             {
                 Single min = Single.MaxValue;
-                foreach (Single d in _values.Values)
+                foreach (Single d in _values)//.Values)
                 {
                     if (d < min)
                         min = d;
@@ -83,7 +83,8 @@ namespace RemoteMon
             }
         }
 
-        private readonly Dictionary<Int32, Single> _values;
+        //private readonly Dictionary<Int32, Single> _values; ///wtf was the point of this?
+        private readonly Single[] _values;
         private Int32 _currentIndex = 0;
         private Single CurrentValue
         {
@@ -138,9 +139,9 @@ namespace RemoteMon
 
         public DataGridViewGraphCell()
         {
-            _values = new Dictionary<Int32, Single>(10);
+            _values = new Single[10];//new Dictionary<Int32, Single>(10);
             for (int i = 0; i < 10; i++)
-                _values.Add(i, 0f);
+                _values[i] = 0f;//.Add(i, 0f);
 
             //_lightGrayPen = new Pen(Color.LightGray, 1f);
             //_greenPen = new Pen(Color.LightGreen, 1f);//.FromKnownColor(KnownColor.Green));
