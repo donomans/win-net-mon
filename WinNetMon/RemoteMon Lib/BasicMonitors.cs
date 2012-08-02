@@ -274,30 +274,14 @@ namespace RemoteMon_Lib
             }
         }
 
-        public new unsafe Int32 GetHashCode()
+        public override Int32 GetHashCode()
         {
-            String s = _friendlyName + _alertInfo + _common +
+            String s = _friendlyName + _alertInfo.GetHashCode() + _common +
                        _updateFrequency + _basicMonitorType + 
-                       _credential + _data;
-
-            fixed (Char* str = s.ToCharArray())
-            {
-                Char* chPtr = str;
-                Int32 x = 0x34058547;
-                Int32 y = x;
-                Int32* intPtr = (Int32*)chPtr;
-                for (Int32 i = s.Length; i > 0; i -= 4)
-                {
-                    x = (((x << 5) + x) + (x >> 0x1B)) ^ intPtr[0];
-                    if (i <= 2)
-                    {
-                        break;
-                    }
-                    y = (((y << 5) + y) + (y >> 0x1B)) ^ intPtr[1];
-                    intPtr += 2;
-                }
-                return (x + (y * 0x214BD12C));
-            }
+                       _credential.Username + _credential.Domain + 
+                       _data;
+            
+            return s.GetHashCode();            
         }
     }
 
