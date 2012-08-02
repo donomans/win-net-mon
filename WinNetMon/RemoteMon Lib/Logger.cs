@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Runtime.CompilerServices;
 
 namespace RemoteMon_Lib
 {
@@ -31,7 +32,10 @@ namespace RemoteMon_Lib
             get { return instance; }
         }
 
-        public void Log(Type type, LogType logType, String text)
+        public void Log(Type type, LogType logType, String text,
+            [CallerMemberName] String methodName = "",
+            [CallerLineNumber] Int32 lineNumber = 0,
+            [CallerFilePath] String filePath = "")
         {
 //#if !DEBUG
             //if(logType == LogType.Debug)
@@ -44,15 +48,15 @@ namespace RemoteMon_Lib
                 type = this.GetType();
 
             String dateTime = DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss.fffffff");
-            String methodName = "";
-            if (logType == LogType.Debug)
-            {
-                try
-                {
-                    methodName = new StackFrame(1).GetMethod().Name;
-                }
-                catch (Exception) { }
-            }
+            //String methodName = "";
+            //if (logType == LogType.Debug)
+            //{
+            //    try
+            //    {
+            //        methodName = new StackFrame(1).GetMethod().Name;
+            //    }
+            //    catch (Exception) { }
+            //}
             //String nameSpace = "RemoteMon_Lib";
             //if(type.Namespace != null)
             //    nameSpace = type.Namespace;
@@ -63,12 +67,17 @@ namespace RemoteMon_Lib
 
                 //_toLogWorking[nameSpace]
                 _logWorking.Add(dateTime + "\t" + logType + "\t" + type.ToString() + " " +
-                                (methodName != "" ? (methodName + ": ") : "") + text + "\t");
+                                (logType == LogType.Debug ?
+                                    ((methodName != "" ? (methodName + ": ") : "") +
+                                    "\t Line: " + lineNumber + "\t File: " + filePath)
+                                    : "")
+                                + text + "\t");
 
             }
             PushLog();
         }
-        public void LogException(Type type, Exception exception)
+        public void LogException(Type type, Exception exception,
+            [CallerMemberName] String methodName = "")
         {
             if (!_verbose)
                 return;
@@ -77,13 +86,7 @@ namespace RemoteMon_Lib
                 type = this.GetType();
 
             String dateTime = DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss.fffffff");
-            String methodName = "";
-            try
-            {
-                methodName = new StackFrame(1).GetMethod().Name;
-            }
-            catch(Exception) { }
-            
+                       
             String innerExceptions = "";
             Exception innerException = exception.InnerException;
             while(innerException != null)
