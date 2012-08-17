@@ -754,7 +754,7 @@ namespace RemoteMon
         }
         private IMonitor PopulateConfigurationDataFromServerInfo(AddServer addServerForm)
         {
-            List<CAlert> alerts = new List<CAlert>(2);
+            List<Alert> alerts = new List<Alert>(2);
             //Boolean alertsExist = addServerForm.GetAlerts(out alerts);
             //alerts = 
             if (addServerForm.addServerAlertEmailOption.CheckState == CheckState.Checked)
@@ -780,7 +780,7 @@ namespace RemoteMon
                         BasicMonitor basicMonitor = addServerForm.GetBasicMonitor();
                         if (alertsExist)
                         {
-                            foreach (CAlert alert in alerts)
+                            foreach (Alert alert in alerts)
                             {
                                 //if (!configurationData.Settings.IsDefaultAlert(alert))
                                 //{
@@ -814,10 +814,10 @@ namespace RemoteMon
                          * - Process State (e.g. explorer.exe)
                          * - Service State (e.g. Intelligent Background Transfer Service)
                          */
-                        List<CAlert> validAlerts = new List<CAlert>(2);
+                        List<Alert> validAlerts = new List<Alert>(2);
                         if (alertsExist)
                         {
-                            foreach (CAlert alert in alerts)
+                            foreach (Alert alert in alerts)
                             {
                                 //if (!configurationData.Settings.IsDefaultAlert(alert))
                                 //{
@@ -944,7 +944,7 @@ namespace RemoteMon
                         EventMonitor eventMonitor = addServerForm.GetEventMonitor();
                         if (alertsExist)
                         {
-                            foreach (CAlert alert in alerts)
+                            foreach (Alert alert in alerts)
                             {
                                 //if (!configurationData.Settings.IsDefaultAlert(alert))
                                 //{
@@ -973,7 +973,7 @@ namespace RemoteMon
                         PfcMonitor pfcMonitor = addServerForm.GetPfcMonitor();
                         if (alertsExist)
                         {    
-                            foreach (CAlert alert in alerts)
+                            foreach (Alert alert in alerts)
                             {
                                 //if (!configurationData.Settings.IsDefaultAlert(alert))
                                 //{
@@ -1003,7 +1003,7 @@ namespace RemoteMon
                         ServiceMonitor serviceMonitor = addServerForm.GetServiceMonitor();
                         if (alertsExist)
                         {
-                            foreach (CAlert alert in alerts)
+                            foreach (Alert alert in alerts)
                             {
                                 //if (!configurationData.Settings.IsDefaultAlert(alert))
                                 //{
@@ -1034,7 +1034,7 @@ namespace RemoteMon
                         //NOTE: need a GetWmiMonitor() later on, potentially
                         if (alertsExist)
                         {    
-                            foreach (CAlert alert in alerts)
+                            foreach (Alert alert in alerts)
                             {
                                 //if (!configurationData.Settings.IsDefaultAlert(alert))
                                 //{
@@ -1656,7 +1656,7 @@ namespace RemoteMon
             {
                 if (configurationData.Settings.DefaultAlerts.Count > 0)
                 {
-                    foreach (CAlert alert in configurationData.Settings.DefaultAlerts)
+                    foreach (Alert alert in configurationData.Settings.DefaultAlerts)
                     {
                         switch (alert.Type)
                         {

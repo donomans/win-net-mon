@@ -14,9 +14,9 @@ namespace RemoteMon_Lib
 
         private Alerts _defaultAlerts = new Alerts();
 
-        public Boolean IsDefaultAlert(CAlert alert)
+        public Boolean IsDefaultAlert(Alert alert)
         {
-            foreach (CAlert c in _defaultAlerts)
+            foreach (Alert c in _defaultAlerts)
             {
                 if (c.Type == alert.Type && c.Info.ToLower() == alert.Info.ToLower())
                     return true;
@@ -24,12 +24,12 @@ namespace RemoteMon_Lib
             return false;
         }
 
-        public void AddRangeNoDupes(IEnumerable<CAlert> alerts)
+        public void AddRangeNoDupes(IEnumerable<Alert> alerts)
         {
-            foreach (CAlert ca in alerts)
+            foreach (Alert ca in alerts)
             {
                 Boolean toAdd = true;
-                foreach (CAlert c in _defaultAlerts)
+                foreach (Alert c in _defaultAlerts)
                     if (c.Info == ca.Info)
                         toAdd = false;
 

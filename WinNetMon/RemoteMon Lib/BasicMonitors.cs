@@ -422,7 +422,7 @@ namespace RemoteMon_Lib
 
         public Boolean SendAlert()
         {
-            return CAlert.SendAlert(this);
+            return Alert.SendAlert(this);
         }
     }
 

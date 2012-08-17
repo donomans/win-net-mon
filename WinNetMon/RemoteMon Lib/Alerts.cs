@@ -7,9 +7,9 @@ using System.Xml.Serialization;
 namespace RemoteMon_Lib
 {
     [Serializable]
-    public class Alerts : IEnumerable<CAlert>
+    public class Alerts : IEnumerable<Alert>
     {
-        private readonly List<CAlert> _alerts = new List<CAlert>(2);
+        private readonly List<Alert> _alerts = new List<Alert>(2);
 
         public void RemoveType(AlertType alertType)
         {
@@ -21,15 +21,15 @@ namespace RemoteMon_Lib
             get { return _alerts.Count; }
         }
 
-        public void AddRange(IEnumerable<CAlert> alerts)
+        public void AddRange(IEnumerable<Alert> alerts)
         {
             _alerts.AddRange(alerts);
         }
-        public void Add(CAlert alert)
+        public void Add(Alert alert)
         {
             _alerts.Add(alert);
         }
-        public CAlert this[int index]
+        public Alert this[int index]
         {
             get { return _alerts[index]; }
             set { _alerts[index] = value; }
@@ -37,10 +37,10 @@ namespace RemoteMon_Lib
 
         public Boolean SendAlerts(IResult result)
         {
-            return CAlert.SendAlert(result, this);
+            return Alert.SendAlert(result, this);
         }
 
-        public IEnumerator<CAlert> GetEnumerator()
+        public IEnumerator<Alert> GetEnumerator()
         {
             return _alerts.GetEnumerator();
         }
@@ -52,15 +52,15 @@ namespace RemoteMon_Lib
 
     [XmlInclude(typeof(EmailAlert))]
     [XmlInclude(typeof(SmsAlert))]
-    public abstract class CAlert
-    { //NOTE: couldn't do interface - they don't serialize.
+    public abstract class Alert
+    { //NOTE: couldn't do interface - they don't serialize.  This feels dumb.  Need
         public abstract AlertType Type { get; }
         public abstract String Info { get; set; }
         //public abstract Boolean Send();
         //public new abstract String ToString();
         public override string ToString()
         {
-            return "Alert Type: " + this.Type + ", Info: " + Info;
+            return "Alert Type: " + this.Type + ", Info: " + this.Info;
         }
 
 
@@ -78,7 +78,7 @@ namespace RemoteMon_Lib
             Boolean send = true;
             //if (alerts.Count > 0)
             //{
-                foreach (CAlert ca in alerts)
+                foreach (Alert ca in alerts)
                 {
                     try
                     {
@@ -114,14 +114,14 @@ namespace RemoteMon_Lib
                                     try
                                     {
                                         client.Send(message);
-                                        Logger.Instance.Log(typeof (CAlert), LogType.Info,
+                                        Logger.Instance.Log(typeof (Alert), LogType.Info,
                                                             "Alert Email successfully sent for: " + ((IMonitor) result.Monitor).FriendlyName);
                                     }
                                     catch (Exception ex)
                                     {
-                                        Logger.Instance.Log(typeof (CAlert), LogType.Info,
+                                        Logger.Instance.Log(typeof (Alert), LogType.Info,
                                                             "Alert Email for: " + ((IMonitor) result.Monitor).FriendlyName + " failed to send.");
-                                        Logger.Instance.LogException(typeof (CAlert), ex);
+                                        Logger.Instance.LogException(typeof (Alert), ex);
                                         send = false;
                                     }
                                 }
@@ -134,9 +134,9 @@ namespace RemoteMon_Lib
                     }
                     catch (Exception ex)
                     {
-                        Logger.Instance.Log(typeof(CAlert), LogType.Info,
+                        Logger.Instance.Log(typeof(Alert), LogType.Info,
                                             "Alert failed to send -- " + ca.ToString());
-                        Logger.Instance.LogException(typeof(CAlert), ex);
+                        Logger.Instance.LogException(typeof(Alert), ex);
                         send = false;
                     }
                 }
@@ -151,7 +151,7 @@ namespace RemoteMon_Lib
 
 
     [SerializableAttribute]
-    public class EmailAlert : CAlert
+    public class EmailAlert : Alert
     {
         private String _emailAddressTo = "";
         private String _emailServerHostName = "";
@@ -222,7 +222,7 @@ namespace RemoteMon_Lib
         //}
     }
     [SerializableAttribute]
-    public class SmsAlert : CAlert
+    public class SmsAlert : Alert
     {
         private String _smsNumber = "";
         private String _smsServer = "";

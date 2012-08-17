@@ -22,7 +22,7 @@ namespace RemoteMon
 
 
         public AddServer(String monitorName, String remoteIpOrHostName, FullMonitorType tab,
-                         MonitorBaseType baseTab, IEnumerable<CAlert> defaultAlerts)
+                         MonitorBaseType baseTab, IEnumerable<Alert> defaultAlerts)
         {
             InitializeComponent();
             perfCounterPCTypeDdl.Visible = false;
@@ -32,7 +32,7 @@ namespace RemoteMon
             perfCounterInstanceNameDdl.Visible = false;
             perfCounterInstanceNameWaitLabel.Visible = true;
 
-            foreach(CAlert c in defaultAlerts)
+            foreach(Alert c in defaultAlerts)
             {
                 switch(c.Type)
                 {
@@ -93,7 +93,7 @@ namespace RemoteMon
             ReturnValue = FullMonitorType.None;
         }
         public AddServer(String monitorName, String remoteIpOrHostName, FullMonitorType tab,
-                         MonitorBaseType baseTab, IEnumerable<CAlert> defaultAlerts, IMonitor repopulateMonitor)
+                         MonitorBaseType baseTab, IEnumerable<Alert> defaultAlerts, IMonitor repopulateMonitor)
         {
             InitializeComponent();
             perfCounterPCTypeDdl.Visible = false;
@@ -103,7 +103,7 @@ namespace RemoteMon
             perfCounterInstanceNameDdl.Visible = false;
             perfCounterInstanceNameWaitLabel.Visible = true;
 
-            foreach (CAlert c in defaultAlerts)
+            foreach (Alert c in defaultAlerts)
             {
                 switch (c.Type)
                 {
@@ -240,9 +240,9 @@ namespace RemoteMon
             private set { _returnValue = value; }
         }
 
-        public Boolean GetAlerts(out List<CAlert> alerts)
+        public Boolean GetAlerts(out List<Alert> alerts)
         {
-            alerts = new List<CAlert>(2);
+            alerts = new List<Alert>(2);
             if (addServerAlertEmailOption.CheckState == CheckState.Checked)
                 alerts.Add(new EmailAlert { Info = addServerAlertEmailTextBox.Text });
             if (addServerAlertSmsOption.CheckState == CheckState.Checked)
