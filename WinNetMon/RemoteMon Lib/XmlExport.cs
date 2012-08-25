@@ -12,56 +12,22 @@ namespace RemoteMon_Lib
     /// </summary>
     public class XmlExport
     {
-        private String _fileName = "";
-        private Object _data;
-
-        public String FileName
-        {
-            get { return _fileName; }
-            set { _fileName = value; }
-        }
-        //private ConfigurationData ConfigurationData
-        //{
-        //    get { return _data; }
-        //    set { _data = value; }
-        //}
-
-        private XmlExport() {}
-
-        public XmlExport(string fileName, ConfigurationData data)
-        {
-            _fileName = fileName;
-            _data = data;
-        }
-        public XmlExport(string fileName, NotifySettings data)
-        {
-            _fileName = fileName;
-            _data = data;
-        }
-
-        /// <summary>
-        /// Export the set configuration data
-        /// </summary>
-        /// <remarks>ConfigurationData must be set before</remarks>
-        /// <returns></returns>
-        public Boolean ExportConfigurationData()
+        public static Boolean Export(String fileName, Object data)
         {
             Stream str = null;
             try
             {
-                if (_data != null && _fileName != "")
-                {
-                    ConfigurationData data = (ConfigurationData) _data;
-                    data.TimeStamp = DateTime.Now;
-                    XmlSerializer serializer = new XmlSerializer(typeof(ConfigurationData));
+                if (data != null && fileName != "")
+                {                   
+                    XmlSerializer serializer = new XmlSerializer(data.GetType());
 
-                    str = File.Create(_fileName + "tmp");
+                    str = File.Create(fileName + "tmp");
 
                     serializer.Serialize(str, data);
                     str.Dispose();
-                    FileInfo fi = new FileInfo(_fileName + "tmp");
-                    fi.CopyTo(_fileName, true);
-                    //NOTE: need to make sure file isn't ever deleted if this fails, for some reason.
+                    FileInfo fi = new FileInfo(fileName + "tmp");
+                    fi.CopyTo(fileName, true);
+                    ///NOTE: need to make sure file isn't ever deleted if this fails, for some reason.
                     fi.Delete();
 
                     return true;
@@ -77,50 +43,21 @@ namespace RemoteMon_Lib
                 }
             }
         }
-        public Boolean ExportNotifySettings()
+        public static Boolean Export(String fileName, ConfigurationData data)
         {
-            Stream str = null;
-            try
-            {
-                if (_data != null && _fileName != "")
-                {
-                    NotifySettings data = (NotifySettings)_data;
-
-                    XmlSerializer serializer = new XmlSerializer(typeof(NotifySettings));
-
-                    str = File.Create(_fileName + "tmp");
-
-                    serializer.Serialize(str, data);
-                    str.Dispose();
-                    FileInfo fi = new FileInfo(_fileName + "tmp");
-                    fi.CopyTo(_fileName, true);
-                    //NOTE: need to make sure file isn't ever deleted if this fails, for some reason.
-                    fi.Delete();
-
-                    return true;
-                }
-                else
-                    return false;
-            }
-            finally
-            {
-                if (str != null)
-                {
-                    str.Dispose();
-                }
-            }
+            data.TimeStamp = DateTime.Now;
+            return Export(fileName, data);
         }
 
-        public static Byte[] Serializer(Type type, Object obj)
+  
+        public static Byte[] Serializer(Object obj)
         {
-            //MemoryStream str = null;
             MD5 md5 = null;
             FileStream fs = null;
             try
             {
-                XmlSerializer xs = new XmlSerializer(type);
-                fs = File.Create(Environment.CurrentDirectory + @"\tmp.ngs");//Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\RemoteMon\tmp.ngs");
-                //str = new MemoryStream(); //NOTE: why doesn't memory stream work properly?
+                XmlSerializer xs = new XmlSerializer(obj.GetType());
+                fs = File.Create(Environment.CurrentDirectory + @"\tmp.ngs");
                 
                 xs.Serialize(fs, obj);
 
@@ -133,7 +70,7 @@ namespace RemoteMon_Lib
                 byteList.AddRange(datetimebytes);
 
                 md5 = MD5.Create();
-                Byte[] hashbytes = md5.ComputeHash(byteList.ToArray());//str);
+                Byte[] hashbytes = md5.ComputeHash(byteList.ToArray());
    
                 return hashbytes;
             }
@@ -144,8 +81,6 @@ namespace RemoteMon_Lib
             }
             finally
             {
-                //if (str != null)
-                //    str.Dispose();
                 if (fs != null)
                     fs.Dispose();
                 if(md5 != null)

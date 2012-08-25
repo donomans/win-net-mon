@@ -9,26 +9,13 @@ namespace RemoteMon_Lib
     /// </summary>
     class XmlImport
     {
-        private string _fileName;
-        
-        public String FileName
-        {
-            get { return _fileName; }
-            set { _fileName = value; }
-        }
-
-        public XmlImport(string fileName)
-        {
-            _fileName = fileName;
-        }
-
-        public Object Import(Type importType)
+        public static Object Import(String fileName, Type importType)
         {
             StreamReader sr = null;
             try
             {
                 XmlSerializer xml = new XmlSerializer(importType);
-                sr = new StreamReader(_fileName);
+                sr = new StreamReader(fileName);
                 return xml.Deserialize(sr); 
             }
             finally

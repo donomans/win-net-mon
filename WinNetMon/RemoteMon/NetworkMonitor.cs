@@ -1582,16 +1582,16 @@ namespace RemoteMon
             if (dr == DialogResult.OK)
             {
                 String fileName = saveConfigurationFd.FileName;
-                XmlExport xmlExport = new XmlExport(fileName, configurationData);
+                XmlExport.Export(fileName, configurationData);
 
-                try
-                {
-                    xmlExport.ExportConfigurationData();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Instance.LogException(this.GetType(), ex);
-                }
+                //try
+                //{
+                //    xmlExport.
+                //}
+                //catch (Exception ex)
+                //{
+                //    Logger.Instance.LogException(this.GetType(), ex);
+                //}
             }
         }
         private void LoadConfigurationToolStripMenuItemClick(object sender, EventArgs e)

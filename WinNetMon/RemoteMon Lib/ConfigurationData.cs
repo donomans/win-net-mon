@@ -114,13 +114,12 @@ namespace RemoteMon_Lib
 
         public Boolean ExportToXml(String fileName)
         {            
-            return new XmlExport(fileName, this).ExportConfigurationData();
+            return XmlExport.Export(fileName, this);
         }
 
         public static ConfigurationData LoadConfiguration(String fileName)
         {
-            XmlImport xml = new XmlImport(fileName);
-            Object o = xml.Import(typeof(ConfigurationData));
+            Object o = XmlImport.Import(fileName, typeof(ConfigurationData));
             return o == null ? null : (ConfigurationData)o;
         }
 

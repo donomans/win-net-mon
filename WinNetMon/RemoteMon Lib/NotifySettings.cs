@@ -21,15 +21,13 @@ namespace RemoteMon_Lib
 
         public static NotifySettings LoadSettings(String fileName)
         {
-            XmlImport xml = new XmlImport(fileName);
-            Object o = xml.Import(typeof (NotifySettings));
+            Object o = XmlImport.Import(fileName, typeof (NotifySettings));
             return o == null ? null : (NotifySettings)o;
         }
 
         public Boolean ExportToXml(String fileName)
         {
-            XmlExport xml = new XmlExport(fileName, this);
-            return xml.ExportNotifySettings();
+            return XmlExport.Export(fileName, this);
         }
     }
 }
